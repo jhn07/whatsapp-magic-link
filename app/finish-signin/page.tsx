@@ -5,8 +5,9 @@ import { SpaceBackground } from "@/components/space-background";
 import { CheckCircle, Loader2, Mail, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFinishSignin } from '@/hooks/useFinishSignin';
+import { Suspense } from "react";
 
-export default function FinishSignIn() {
+function FinishSignInContent() {
   const { status, message } = useFinishSignin();
 
   const renderContent = () => {
@@ -91,4 +92,16 @@ export default function FinishSignIn() {
       </div>
     </div>
   );
+}
+
+export default function FinishSignIn() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-indigo-900">
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
+    }>
+      <FinishSignInContent />
+    </Suspense>
+  )
 }

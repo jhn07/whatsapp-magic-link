@@ -5,9 +5,9 @@ import { MagicLinkForm } from '@/components/magic-link-form';
 export default function Home() {
   return (
     <div className="min-h-screen relative">
-      {/* On mobile - form on top, on desktop - split screen */}
-      <div className="flex flex-col md:flex-row h-full">
-        {/* Space background - hide on mobile */}
+      {/* For mobile: vertical layout, for desktop: horizontal layout */}
+      <div className="flex flex-col md:flex-row min-h-screen">
+        {/* Space background - full size on desktop */}
         <div className="hidden md:block md:flex-1 relative">
           <SpaceBackground />
 
@@ -28,7 +28,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Title only for mobile */}
+        {/* Заголовок только для мобильных */}
         <div className="block md:hidden bg-gradient-to-b from-indigo-900 to-blue-800 p-6 text-center text-white">
           <h1 className="text-3xl font-light mb-2">
             Book Your
@@ -41,7 +41,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Form Magic Link on desktop */}
+        {/* Form Magic Link - выровнен по центру на десктопе */}
         <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-gray-50">
           <Suspense fallback={<div>Loading...</div>}>
             <MagicLinkForm />
