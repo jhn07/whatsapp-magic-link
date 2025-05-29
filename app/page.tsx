@@ -1,16 +1,16 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { SpaceBackground } from '@/components/space-background';
-import { MagicLinkForm } from '@/components/magic-link-form-copy';
+import { MagicLinkForm } from '@/components/magic-link-form';
 
 export default function Home() {
   return (
     <div className="min-h-screen relative flex">
-      {/* Космический фон */}
+      {/* Space background */}
       <div className="flex-1 relative">
         <SpaceBackground />
 
-        {/* Заголовок на космическом фоне */}
+        {/* Title on the space background */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-6xl font-light leading-tight mb-4">
@@ -27,9 +27,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Форма Magic Link */}
+      {/* Form Magic Link */}
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
-        <MagicLinkForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <MagicLinkForm />
+        </Suspense>
       </div>
     </div>
   );

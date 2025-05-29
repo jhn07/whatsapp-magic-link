@@ -1,62 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Loader2, Calendar } from 'lucide-react';
-import { auth } from '@/lib/firebase';
-import { sendSignInLinkToEmail } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useMagicLink } from '@/hooks/useMagicLink';
+import { useAuth } from '@/hooks/useAuth';
+import { useSearchParams } from 'next/navigation';
 
 export const MagicLinkForm = () => {
+
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('from') || '/dashboard';
+
+
   const [email, setEmail] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isEmailSent, setIsEmailSent] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
+  const { user, loading: authLoading } = useAuth({ redirectIfAuthenticated: true });
 
-  const router = useRouter()
-
-
-  useEffect(() => {
-    const unsubscrine = auth.onAuthStateChanged((user) => {
-      if (user) {
-        router.push('/dashboard')
-      } else {
-        setIsChecking(false)
-      }
-    })
-
-    // cleanup function
-    return () => unsubscrine()
-  }, [])
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const actionCodeSettings = {
-    url: `${origin}/finish-signin`,
-    handleCodeInApp: true,
-  }
+  const { sendMagicLink, loading, success, error, reset } = useMagicLink({
+    redirectUrl: typeof window !== 'undefined'
+      ? `${window.location.origin}/finish-signin?redirect=${encodeURIComponent(redirectPath)}`
+      : "",
+    onSuccess: () => {
+      console.log('Magic link sent successfully');
+    },
+    onError: (error) => {
+      console.error('Error sending magic link:', error);
+    }
+  })
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      window.localStorage.setItem("emailForSignIn", email);
-      setIsEmailSent(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed to send magic link. Please try again.');
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
+    await sendMagicLink(email)
   };
 
-  if (isChecking) {
+  if (authLoading) {
     return (
       <div className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl text-center">
         <div className="flex flex-col items-center justify-center">
@@ -67,7 +47,7 @@ export const MagicLinkForm = () => {
     )
   }
 
-  if (isEmailSent) {
+  if (success) {
     return (
       <div className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl text-center">
         <div className="mb-6">
@@ -83,7 +63,7 @@ export const MagicLinkForm = () => {
 
         <Button
           onClick={() => {
-            setIsEmailSent(false);
+            reset();
             setEmail('');
           }}
           variant="outline"
@@ -119,16 +99,16 @@ export const MagicLinkForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             required
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
 
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50"
-          disabled={!email || isLoading}
+          disabled={!email || loading}
         >
-          {isLoading ? (
+          {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Sending access link...
