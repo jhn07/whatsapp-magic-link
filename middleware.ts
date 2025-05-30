@@ -22,13 +22,9 @@ export async function middleware(req: NextRequest) {
 
       const token = req.cookies.get(configData.SESSION_COOKIE_NAME)?.value;
 
-      console.log("Token:", token);
-
       if (!token) {
         const redirectUrl = new URL(configData.AUTH_REDIRECT_PATH, req.url);
         redirectUrl.searchParams.set('from', pathname);
-
-        console.log("Redirecting to:", redirectUrl);
 
         return NextResponse.redirect(redirectUrl);
       }
@@ -42,7 +38,6 @@ export async function middleware(req: NextRequest) {
 
       return response;
     } catch (error) {
-      console.error('Middleware error:', error);
       // If there is an error, also redirect to the main page
       return NextResponse.redirect(new URL(configData.AUTH_REDIRECT_PATH, req.url));
     }

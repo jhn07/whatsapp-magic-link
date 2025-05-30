@@ -2,7 +2,6 @@
 
 
 import { adminAuth } from "@/lib/firebase-admin";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 interface SessionConfig {
@@ -38,15 +37,6 @@ export async function POST(req: Request): Promise<NextResponse> {
     const expiresIn = config.expiryDays * 24 * 60 * 60 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
-    console.log("Creating session cookie", {
-      name: config.cookieName,
-      maxAge: expiresIn / 1000,
-      httpOnly: true,
-      secure: config.secure,
-      sameSite: config.sameSite,
-      path: config.path,
-    })
-
     const response = NextResponse.json(
       { status: 'success' },
       {
@@ -67,28 +57,9 @@ export async function POST(req: Request): Promise<NextResponse> {
       path: config.path,
     });
 
-    const cookies = response.cookies.getAll();
-    console.log("Cookies set in response:", cookies.map((c) => ({
-      name: c.name,
-      value: c.value ? `${c.value.substring(0, 10)}...` : null,
-      options: {
-        ...c,
-      }
-    })));
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Session cookie set:', {
-        name: config.cookieName,
-        path: config.path,
-        secure: config.secure,
-        sameSite: config.sameSite
-      });
-    }
-
     return response;
 
   } catch (error) {
-    console.error("Session creation error:", error);
     return NextResponse.json(
       { status: 'error', message: error instanceof Error ? error.message : 'Internal error' },
       {
